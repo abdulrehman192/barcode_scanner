@@ -1,4 +1,4 @@
-package com.example.barcode_scanner
+package com.techomatic.barcode_scanner
 
 import io.flutter.embedding.android.FlutterActivity
 

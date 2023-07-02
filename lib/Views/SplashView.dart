@@ -1,7 +1,10 @@
-import 'package:barcode_scanner/Views/HomeView.dart';
+import 'package:barcode_scanner/Views/DashboardView.dart';
+import 'package:barcode_scanner/Views/OnboardView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
 
@@ -13,9 +16,16 @@ class _SplashViewState extends State<SplashView> {
 
   _showNext() async
   {
-
+    SharedPreferences shared = await SharedPreferences.getInstance();
+    bool tip = shared.getBool("tip") ?? false;
     Future.delayed(const Duration(seconds: 2), (){
-      Get.offAll(() => const HomeView());
+      if(tip){
+        Get.offAll(() => const DashboardView());
+      }
+      else
+        {
+          Get.offAll(() => const OnboardView());
+        }
     });
   }
 

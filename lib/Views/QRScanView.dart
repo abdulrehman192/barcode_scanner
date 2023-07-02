@@ -1,12 +1,16 @@
 import 'dart:io';
-import 'package:barcode_scanner/Controllers/ScanController.dart';
-import 'package:barcode_scanner/Views/HomeView.dart';
+import 'package:barcode_scanner/Controllers/QRController.dart';
+import 'package:barcode_scanner/Controllers/SettingsController.dart';
+import 'package:barcode_scanner/Views/DashboardView.dart';
+import 'package:barcode_scanner/Views/ScanResultView.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QRScanView extends StatefulWidget {
   const QRScanView({Key? key}) : super(key: key);
@@ -20,24 +24,15 @@ class _ScanQRCodeState extends State<QRScanView> {
 
   @override
   Widget build(BuildContext context) {
-    final scanWindow = Rect.fromCenter(
-      center: MediaQuery.of(context).size.center(Offset.zero),
-      width: 200,
-      height: 200,
+    final scanWindow = Rect.fromLTWH(
+      0.25.sw, 0.23.sh, 200 , 200
     );
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.black,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarIconBrightness: Brightness.light,
-          statusBarColor: Colors.black
-        ),
-      ),
       backgroundColor: Colors.black,
-      body: GetBuilder<ScanController>(
+      body: GetBuilder<QRController>(
         builder: (con) {
           return Stack(
+            // alignment: Alignment.center,
             children: [
               MobileScanner(
                 fit: BoxFit.fill,
@@ -49,21 +44,34 @@ class _ScanQRCodeState extends State<QRScanView> {
                   });
                 },
                 onDetect: (BarcodeCapture barcode) async {
+                  SettingsController settings = Get.find();
                   con.capture = barcode;
-                  print("data : $barcode");
                   if(barcode.barcodes.isNotEmpty)
                   {
+
+                    if(settings.beep)
+                    {
+                      FlutterRingtonePlayer.play(fromAsset: "assets/audios/beep.wav");
+                    }
+                    if(settings.vibration)
+                    {
+                      settings.vibratePhone();
+                    }
+
                     String? val = barcode.barcodes.first.displayValue;
                     if(val != null)
                     {
                       con.scannedData = val;
-                      print("scanned Data : $val");
+                      if(settings.autoCopy)
+                      {
+                        await Clipboard.setData( ClipboardData(text: val));
+                      }
+                      String category = barcode.barcodes.first.format == BarcodeFormat.qrCode ? "QR" : "Barcode";
+                      con.saveScanHistoryItem("Scan", category);
+                      Get.to(() => const ScanResultView());
                     }
                     con.barcode = barcode.barcodes.first;
                     con.update();
-                    await con.scannerController.stop();
-                    Get.offAll(() => const HomeView());
-
                   }
 
                 },
@@ -125,8 +133,6 @@ class _ScanQRCodeState extends State<QRScanView> {
                               {
                                 bool a = await con.scannerController.analyzeImage(x.path);
                                 if(a){
-                                  await con.scannerController.stop();
-                                  Get.offAll(() => const HomeView());
                                 }
                                 else
                                   {
