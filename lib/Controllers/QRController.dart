@@ -17,7 +17,6 @@ class QRController extends GetxController{
   bool _generated = false;
   String _hintText = "Enter Text here to generate Code";
   BarcodeCapture? capture;
-  MobileScannerArguments? arguments;
   bool _flashOn = false;
   String _scannedData = "";
   double _zoomScale = 0.0;

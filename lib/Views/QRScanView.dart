@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:barcode_scanner/Controllers/QRController.dart';
 import 'package:barcode_scanner/Controllers/SettingsController.dart';
@@ -13,13 +14,74 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QRScanView extends StatefulWidget {
-  const QRScanView({Key? key}) : super(key: key);
+  const QRScanView({super.key});
 
   @override
   State<QRScanView> createState() => _ScanQRCodeState();
 }
 
-class _ScanQRCodeState extends State<QRScanView> {
+class _ScanQRCodeState extends State<QRScanView> with WidgetsBindingObserver{
+
+  StreamSubscription<Object?>? _subscription;
+  final QRController _controller = Get.find<QRController>();
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // If the controller is not ready, do not try to start or stop it.
+    // Permission dialogs can trigger lifecycle changes before the controller is ready.
+    if (!_controller.scannerController.value.hasCameraPermission) {
+      return;
+    }
+
+    switch (state) {
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        return;
+      case AppLifecycleState.resumed:
+      // Restart the scanner when the app is resumed.
+      // Don't forget to resume listening to the barcode events.
+        _subscription = _controller.scannerController.barcodes.listen(_handleBarcode);
+
+        unawaited(_controller.scannerController.start());
+      case AppLifecycleState.inactive:
+      // Stop the scanner when the app is paused.
+      // Also stop the barcode events subscription.
+        unawaited(_subscription?.cancel());
+        _subscription = null;
+        unawaited(_controller.scannerController.stop());
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    // Stop listening to lifecycle changes.
+    WidgetsBinding.instance.removeObserver(this);
+    // Stop listening to the barcode events.
+    unawaited(_subscription?.cancel());
+    _subscription = null;
+    // Dispose the widget itself.
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    // Start listening to lifecycle changes.
+    WidgetsBinding.instance.addObserver(this);
+
+    // Start listening to the barcode events.
+    _subscription = _controller.scannerController.barcodes.listen(_handleBarcode);
+
+    // Finally, start the scanner itself.
+    unawaited(_controller.scannerController.start());
+    super.initState();
+  }
+
+  void _handleBarcode(BarcodeCapture barcodes) {
+    _controller.barcode = barcodes.barcodes.firstOrNull;
+    _controller.update();
+  }
+
 
 
   @override
@@ -38,20 +100,15 @@ class _ScanQRCodeState extends State<QRScanView> {
                 fit: BoxFit.fill,
                 scanWindow: scanWindow,
                 controller: con.scannerController,
-                onScannerStarted: (arguments) {
-                  setState(() {
-                    con.arguments = arguments;
-                  });
-                },
                 onDetect: (BarcodeCapture barcode) async {
-                  SettingsController settings = Get.find();
+                  SettingsController settings = Get.find<SettingsController>();
                   con.capture = barcode;
                   if(barcode.barcodes.isNotEmpty)
                   {
 
                     if(settings.beep)
                     {
-                      FlutterRingtonePlayer.play(fromAsset: "assets/audios/beep.wav");
+                      FlutterRingtonePlayer().play(fromAsset: "assets/audios/beep.wav");
                     }
                     if(settings.vibration)
                     {
@@ -77,12 +134,10 @@ class _ScanQRCodeState extends State<QRScanView> {
                 },
               ),
               if (con.barcode != null &&
-                  con.barcode?.corners != null &&
-                  con.arguments != null)
+                  con.barcode?.corners != null)
                 CustomPaint(
                   painter: BarcodeOverlay(
                     barcode: con.barcode!,
-                    arguments: con.arguments!,
                     boxFit: BoxFit.contain,
                     capture: con.capture!,
                   ),
@@ -131,8 +186,8 @@ class _ScanQRCodeState extends State<QRScanView> {
                             var x = await picker.pickImage(source: ImageSource.gallery);
                             if(x != null)
                               {
-                                bool a = await con.scannerController.analyzeImage(x.path);
-                                if(a){
+                                final res = await con.scannerController.analyzeImage(x.path);
+                                if(res != null){
                                 }
                                 else
                                   {
@@ -270,20 +325,17 @@ class ScannerOverlay extends CustomPainter {
 class BarcodeOverlay extends CustomPainter {
   BarcodeOverlay({
     required this.barcode,
-    required this.arguments,
     required this.boxFit,
     required this.capture,
   });
 
   final BarcodeCapture capture;
   final Barcode barcode;
-  final MobileScannerArguments arguments;
   final BoxFit boxFit;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (barcode.corners == null) return;
-    final adjustedSize = applyBoxFit(boxFit, arguments.size, size);
+    final adjustedSize = applyBoxFit(boxFit, size, size);
 
     double verticalPadding = size.height - adjustedSize.destination.height;
     double horizontalPadding = size.width - adjustedSize.destination.width;
@@ -300,14 +352,14 @@ class BarcodeOverlay extends CustomPainter {
     }
 
     final ratioWidth =
-        (Platform.isIOS ? capture.width! : arguments.size.width) /
+        (Platform.isIOS ? capture.size.width : size.width) /
             adjustedSize.destination.width;
     final ratioHeight =
-        (Platform.isIOS ? capture.height! : arguments.size.height) /
+        (Platform.isIOS ? capture.size.height : size.height) /
             adjustedSize.destination.height;
 
     final List<Offset> adjustedOffset = [];
-    for (final offset in barcode.corners!) {
+    for (final offset in barcode.corners) {
       adjustedOffset.add(
         Offset(
           offset.dx / ratioWidth + horizontalPadding,

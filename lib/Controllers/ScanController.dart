@@ -5,7 +5,6 @@ class ScanController extends GetxController{
   MobileScannerController scannerController = MobileScannerController();
   Barcode? barcode;
   BarcodeCapture? capture;
-  MobileScannerArguments? arguments;
   bool _flashOn = false;
   String _scannedData = "";
   double _zoomScale = 0.0;
