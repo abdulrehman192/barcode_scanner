@@ -1,4 +1,5 @@
 import 'package:barcode_scanner/Controllers/SettingsController.dart';
+import 'package:barcode_scanner/Core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GetBuilder<SettingsController>(
+        autoRemove: false,
         builder: (controller) {
           return ListView(
             children: [
@@ -20,6 +22,8 @@ class SettingsView extends StatelessWidget {
                 subtitle: const Text("Beep when the scan is successful"),
                 trailing: Switch(
                   value: controller.beep,
+                  inactiveTrackColor: AppTheme.greyColor,
+                  inactiveThumbColor: Colors.black,
                   onChanged: (val)async{
                     SharedPreferences shared = await SharedPreferences.getInstance();
                     await shared.setBool("beep", val);
@@ -32,6 +36,8 @@ class SettingsView extends StatelessWidget {
                 title: Text("Vibration", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp),),
                 trailing: Switch(
                   value: controller.vibration,
+                  inactiveTrackColor: AppTheme.greyColor,
+                  inactiveThumbColor: Colors.black,
                   onChanged: (val)async{
                     SharedPreferences shared = await SharedPreferences.getInstance();
                     await shared.setBool("vibration", val);
@@ -44,6 +50,8 @@ class SettingsView extends StatelessWidget {
                 title: Text("Auto copy to clipboard", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp),),
                 trailing: Switch(
                   value: controller.autoCopy,
+                  inactiveTrackColor: AppTheme.greyColor,
+                  inactiveThumbColor: Colors.black,
                   onChanged: (val)async{
                     SharedPreferences shared = await SharedPreferences.getInstance();
                     await shared.setBool("copy", val);
@@ -54,15 +62,6 @@ class SettingsView extends StatelessWidget {
 
               SizedBox(height:10.h ,),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                    onPressed: (){
-
-                    },
-                    child: const Text("Help")
-                ),
-              )
             ],
           );
         }

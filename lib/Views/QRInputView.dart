@@ -33,8 +33,22 @@ class QRInputView extends StatelessWidget {
               InputField(
                   controller: controller.inputController,
                   hintText: controller.hintText,
-                  labelText: title,
-                  keyboard: title == "Contact" || title == "Tel" || title == "Whatsapp" ? TextInputType.phone : TextInputType.text,
+                  labelText: title == 'Wi-Fi' ? 'SSID' : title,
+                  keyboard: title == "Contact" || title == "Phone" || title == "Whatsapp" ? TextInputType.phone : TextInputType.url,
+              ),
+              title != 'Wi-Fi' ? const SizedBox():
+              InputField(
+                controller: controller.passwordController,
+                hintText: 'Enter Wifi Password Here',
+                labelText: 'Password',
+                isPassword: controller.isPassword,
+                trailIcon: GestureDetector(
+                  onTap: (){
+                    controller.isPassword = !controller.isPassword;
+                  },
+                  child: Icon(controller.isPassword? Icons.visibility : Icons.visibility_off),
+                ),
+                keyboard: TextInputType.text,
               ),
               SizedBox(height: 15.h,),
               ElevatedButton(
@@ -43,9 +57,12 @@ class QRInputView extends StatelessWidget {
                    {
                      controller.showSnackBar(title: "Data Required", message: controller.hintText);
                    }
+                 else if(title == 'Wi-Fi' && controller.passwordController.text.trim().isEmpty){
+                   controller.showSnackBar(title: "Password Required", message: "Please Enter Wi-Fi Password");
+                 }
                  else
                    {
-                     SettingsController settings = Get.find();
+                     SettingsController settings = Get.find<SettingsController>();
                      if(settings.autoCopy)
                      {
                        await Clipboard.setData( ClipboardData(text: controller.inputController.text.trim()));
@@ -68,7 +85,7 @@ class QRInputView extends StatelessWidget {
                       alignment: Alignment.center,
                       color: Colors.white,
                       child: QrImageView(
-                        data: controller.inputController.text,
+                        data: title == 'Wi-Fi' ? "WIFI:T:WPA;S:${controller.inputController.text.trim()};P:${controller.passwordController.text.trim()};;" : controller.inputController.text,
                         version: QrVersions.auto,
                         size: 200.w,
                         gapless: true,
@@ -76,6 +93,7 @@ class QRInputView extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 10.h,),
+                  title == 'Wi-Fi' ? const SizedBox():
                   Card(
                     child: ListTile(
                       onTap: () async{
@@ -85,6 +103,7 @@ class QRInputView extends StatelessWidget {
                       title: const Text("Share as Text"),
                     ),
                   ),
+                  title == 'Wi-Fi' ? const SizedBox():
                   Card(
                     child: ListTile(
                       onTap: () async{

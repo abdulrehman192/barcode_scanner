@@ -1,4 +1,5 @@
 import 'package:barcode_scanner/Controllers/QRController.dart';
+import 'package:barcode_scanner/Core/app_theme.dart';
 import 'package:barcode_scanner/Views/QRInputView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,7 @@ class CreateQRCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: ()async{
         QRController controller = Get.find();
         controller.inputController.clear();
@@ -33,7 +34,7 @@ class CreateQRCard extends StatelessWidget {
       },
       child: Column(
         children: [
-          Ink(
+          Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.w),
               color: Colors.white,
@@ -48,11 +49,11 @@ class CreateQRCard extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(12.h),
 
-              child: SvgPicture.asset(item.imageUrl, width: 33.w,)
+              child: SvgPicture.asset(item.imageUrl, width: 25.w, height: 25.h, colorFilter: ColorFilter.mode(AppTheme.primaryColor, BlendMode.srcIn),)
             ),
           ),
           SizedBox(height: 5.h,),
-          Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold),)
+          Text(item.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp),)
         ],
       ),
     );

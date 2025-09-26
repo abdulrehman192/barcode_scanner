@@ -1,5 +1,6 @@
 import 'package:barcode_scanner/Controllers/DashboardController.dart';
 import 'package:barcode_scanner/Controllers/QRController.dart';
+import 'package:barcode_scanner/Core/app_theme.dart';
 import 'package:barcode_scanner/Views/QRScanView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,14 +13,14 @@ class DashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<DashboardController>(
       builder: (dash) {
-        String title = "QR & Barcode Scanner";
+        String title = "Scanify";
         if(dash.selectedIndex == 0)
           {
-            title = "QR & Barcode Scanner";
+            title = "Scanify: QR & Barcode Scanner";
           }
         else if(dash.selectedIndex == 1)
         {
-          title = "QR & Barcode Creator";
+          title = "Create QR & Barcodes";
         }
         else if(dash.selectedIndex == 2)
         {
@@ -57,34 +58,38 @@ class DashboardView extends StatelessWidget {
                          ]
                        );
                       },
-                      icon: const Icon(Icons.delete_forever)
+                      icon: const Icon(Icons.delete_forever, color: Colors.red,)
                   ): const SizedBox.shrink()
             ],
           ),
           body: dash.pages[dash.selectedIndex],
           bottomNavigationBar: BottomNavigationBar(
             unselectedItemColor: Colors.grey,
-            selectedItemColor: Colors.deepPurple,
+            selectedItemColor: AppTheme.primaryColor,
+            selectedLabelStyle: TextStyle(fontSize: 12.sp, color: AppTheme.primaryColor,),
+            unselectedLabelStyle: TextStyle(fontSize: 12.sp),
+            type: BottomNavigationBarType.fixed,
+            selectedIconTheme: IconThemeData(color: AppTheme.primaryColor,),
             currentIndex: dash.selectedIndex,
             onTap: (i){
               dash.selectedIndex = i;
             },
             showUnselectedLabels: true,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.document_scanner_outlined),
+                icon: Icon(Icons.document_scanner_outlined, ),
                 label: "Scan"
               ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.apps),
+                  icon: Icon(Icons.qr_code, ),
                   label: "Create"
               ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
+                  icon: Icon(Icons.history, ),
                   label: "History"
               ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
+                  icon: Icon(Icons.settings,),
                   label: "Settings"
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:barcode_scanner/Controllers/DashboardController.dart';
 import 'package:barcode_scanner/Controllers/QRController.dart';
 import 'package:barcode_scanner/Controllers/ScanController.dart';
 import 'package:barcode_scanner/Controllers/SettingsController.dart';
+import 'package:barcode_scanner/Core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -25,13 +26,10 @@ class MyApp extends StatelessWidget {
         useInheritedMediaQuery: true,
       builder: (context, _) {
         return GetMaterialApp(
-          title: 'QR & Barcode Scanner',
+          title: 'Scanify: QR & Barcode Scanner & Generator',
           debugShowCheckedModeBanner: false,
           initialBinding: InitialBindings(),
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
+          theme: AppTheme.getLightTheme(context),
           home: const SplashView(),
           builder: (context, child) {
             return MediaQuery(

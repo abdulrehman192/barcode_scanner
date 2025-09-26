@@ -11,10 +11,12 @@ class QRController extends GetxController{
   final db = SQLiteService.instance;
   MobileScannerController scannerController = MobileScannerController();
   final inputController = TextEditingController();
+  final passwordController = TextEditingController();
   ScreenshotController screenshotController = ScreenshotController();
   Barcode? barcode;
   bool _isNumberInput = false;
   bool _generated = false;
+  bool _isPassword = true;
   String _hintText = "Enter Text here to generate Code";
   BarcodeCapture? capture;
   bool _flashOn = false;
@@ -30,82 +32,50 @@ class QRController extends GetxController{
   bool get flashOn => _flashOn;
   bool get generated => _generated;
   bool get isNumberInput => _isNumberInput;
+  bool get isPassword => _isPassword;
   double get zoomScale => _zoomScale;
 
-  List<QRCreateItem> createList = [
-    QRCreateItem(
-      title: "Clipboard",
-      imageUrl: "assets/images/clipboard.svg"
-    ),
-    QRCreateItem(
-        title: "Website",
-        imageUrl: "assets/images/website.svg"
-    ),
-    QRCreateItem(
-        title: "Wi-Fi",
-        imageUrl: "assets/images/wifi.svg"
-    ),
-    QRCreateItem(
-        title: "Facebook",
-        imageUrl: "assets/images/facebook.svg"
-    ),
-    QRCreateItem(
-        title: "Youtube",
-        imageUrl: "assets/images/youtube.svg"
-    ),
-    QRCreateItem(
-        title: "Whatsapp",
-        imageUrl: "assets/images/whatsapp.svg"
-    ),
-    QRCreateItem(
-        title: "Text",
-        imageUrl: "assets/images/text.svg"
-    ),
-    QRCreateItem(
-        title: "Contact",
-        imageUrl: "assets/images/contact.svg"
-    ),
-    QRCreateItem(
-        title: "Tel",
-        imageUrl: "assets/images/phone.svg"
-    ),
-    QRCreateItem(
-        title: "Email",
-        imageUrl: "assets/images/email.svg"
-    ),
-    QRCreateItem(
-        title: "SMS",
-        imageUrl: "assets/images/sms.svg"
-    ),
-    QRCreateItem(
-        title: "My Card",
-        imageUrl: "assets/images/card.svg"
-    ),
-    QRCreateItem(
-        title: "Paypal",
-        imageUrl: "assets/images/paypal.svg"
-    ),
-    QRCreateItem(
-        title: "Instagram",
-        imageUrl: "assets/images/instagram.svg"
-    ),
-    QRCreateItem(
-        title: "Viber",
-        imageUrl: "assets/images/viber.svg"
-    ),
-    QRCreateItem(
-        title: "Twitter",
-        imageUrl: "assets/images/twitter.svg"
-    ),
-    QRCreateItem(
-        title: "Calendar",
-        imageUrl: "assets/images/calendar.svg"
-    ),
-    QRCreateItem(
-        title: "Spotify",
-        imageUrl: "assets/images/spotify.svg"
-    ),
+  List<QRCreateItem> communicationList = [
+    QRCreateItem(title: "Phone", imageUrl: "assets/images/phone.svg"),
+    QRCreateItem(title: "Email", imageUrl: "assets/images/email.svg"),
+    QRCreateItem(title: "SMS", imageUrl: "assets/images/sms.svg"),
+    QRCreateItem(title: "Whatsapp", imageUrl: "assets/images/whatsapp.svg"),
+    QRCreateItem(title: "Telegram", imageUrl: "assets/images/telegram.svg"),
   ];
+
+  List<QRCreateItem> socialList = [
+    QRCreateItem(title: "Facebook", imageUrl: "assets/images/facebook.svg"),
+    QRCreateItem(title: "Youtube", imageUrl: "assets/images/youtube.svg"),
+    QRCreateItem(title: "Instagram", imageUrl: "assets/images/instagram.svg"),
+    QRCreateItem(title: "LinkedIn", imageUrl: "assets/images/linkedin.svg"),
+    QRCreateItem(title: "Snapchat", imageUrl: "assets/images/snapchat.svg"),
+    QRCreateItem(title: "Tiktok", imageUrl: "assets/images/tiktok.svg"),
+    QRCreateItem(title: "X/Twitter", imageUrl: "assets/images/x.svg"),
+    QRCreateItem(title: "Spotify", imageUrl: "assets/images/spotify.svg"),
+  ];
+
+  List<QRCreateItem> businessList = [
+    QRCreateItem(title: "Paypal", imageUrl: "assets/images/paypal.svg"),
+    QRCreateItem(title: "Crypto Wallet", imageUrl: "assets/images/crypto.svg"),
+    QRCreateItem(title: "My Card", imageUrl: "assets/images/card.svg"),
+    QRCreateItem(title: "Contact", imageUrl: "assets/images/contact.svg"),
+    QRCreateItem(title: "Calendar", imageUrl: "assets/images/calendar.svg"),
+  ];
+
+  List<QRCreateItem> utilitiesList = [
+    QRCreateItem(title: "Clipboard", imageUrl: "assets/images/clipboard.svg"),
+    QRCreateItem(title: "Website", imageUrl: "assets/images/website.svg"),
+    QRCreateItem(title: "Wi-Fi", imageUrl: "assets/images/wifi.svg"),
+    QRCreateItem(title: "Text", imageUrl: "assets/images/text.svg"),
+    QRCreateItem(title: "Location", imageUrl: "assets/images/location.svg"),
+  ];
+
+
+  List<QRCreateItem> appsList = [
+    QRCreateItem(title: "App Store", imageUrl: "assets/images/app-store.svg"),
+    QRCreateItem(title: "Play Store", imageUrl: "assets/images/google-play.svg"),
+  ];
+
 
   set zoomScale(double val)
   {
@@ -121,6 +91,12 @@ class QRController extends GetxController{
   set flashOn(bool val)
   {
     _flashOn = val;
+    update();
+  }
+
+  set isPassword(bool val)
+  {
+    _isPassword = val;
     update();
   }
 
@@ -180,7 +156,7 @@ class QRController extends GetxController{
       }
     else
       {
-        _hintText = "Enter Text here to generate Code";
+        _hintText = "Enter $title link here to generate Code";
       }
     update();
   }
@@ -337,7 +313,8 @@ class QRController extends GetxController{
 
   String getSVGLink(String title)
   {
-    var x = createList.where((element) => element.title == title).toList();
+    final list = [...communicationList, ...socialList, ...businessList, ...utilitiesList, ...appsList];
+    var x = list.where((element) => element.title == title).toList();
     if(x.isNotEmpty)
       {
         return x.first.imageUrl;

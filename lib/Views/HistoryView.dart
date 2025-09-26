@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../Core/app_theme.dart';
+
 class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
 
@@ -23,44 +25,43 @@ class _HistoryViewState extends State<HistoryView> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: TabBar(
+        indicatorSize: TabBarIndicatorSize.tab,
+        controller: tabController,
+        indicatorColor: AppTheme.primaryColor,
+        indicator: BoxDecoration(
+            color: AppTheme.primaryColor
+        ),
+        labelColor: Colors.white,
+        tabs: const [
+          Tab(text: "SCAN",),
+          Tab(text: "Create",),
+        ],
+      ),
       body: GetBuilder<QRController>(
         builder: (controller) {
-          return Column(
+          return TabBarView(
+            controller: tabController,
             children: [
-              TabBar(
-               indicatorSize: TabBarIndicatorSize.tab,
-                controller: tabController,
-                tabs: const [
-                  Tab(text: "SCAN",),
-                  Tab(text: "Create",),
-                ],
+              ListView.builder(
+                  padding: EdgeInsets.all(8.w),
+                  itemCount: controller.scanHistoryItems.length,
+                  itemBuilder: (context, index)
+                  {
+                    return HistoryCard(
+                      item: controller.scanHistoryItems[index],
+                    );
+                  }
               ),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    ListView.builder(
-                        padding: EdgeInsets.all(8.w),
-                        itemCount: controller.scanHistoryItems.length,
-                        itemBuilder: (context, index)
-                            {
-                              return HistoryCard(
-                                item: controller.scanHistoryItems[index],
-                              );
-                            }
-                    ),
-                    ListView.builder(
-                        padding: EdgeInsets.all(8.w),
-                        itemCount: controller.createHistoryItems.length,
-                        itemBuilder: (context, index)
-                        {
-                          return HistoryCard(
-                            item: controller.createHistoryItems[index],
-                          );
-                        }
-                    )
-                  ],
-                ),
+              ListView.builder(
+                  padding: EdgeInsets.all(8.w),
+                  itemCount: controller.createHistoryItems.length,
+                  itemBuilder: (context, index)
+                  {
+                    return HistoryCard(
+                      item: controller.createHistoryItems[index],
+                    );
+                  }
               )
             ],
           );

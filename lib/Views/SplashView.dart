@@ -45,15 +45,10 @@ class _SplashViewState extends State<SplashView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset("assets/images/qr.png", width: 0.40.sw,),
-                  Image.asset("assets/images/barcode.png", width: 0.40.sw,),
-                ],
-              ),
+              Image.asset("assets/images/logo.png", width: 100.w,),
               SizedBox(height: 15.h,),
-              Text("QR & Barcode Scanner", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26.sp),),
+              Text("Scanify", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26.sp),),
+              Text("Scan & Generate with ease", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),),
               const Spacer(),
               const CircularProgressIndicator(),
               SizedBox(height: 25.h,),
